@@ -2,6 +2,24 @@
 <html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      // Break out of any stale service worker or cache traps immediately
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          registrations.forEach(function(registration) {
+            // Unregister any active service worker to force a clean, updated register
+            registration.unregister();
+          });
+        });
+      }
+      if ('caches' in window) {
+        caches.keys().then(function(keys) {
+          keys.forEach(function(key) {
+            caches.delete(key);
+          });
+        });
+      }
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>XYBOT AI - Next-Gen Intelligence</title>
     <meta name="description" content="XYBOT AI - Futuristic AI featuring XY Light, XY Creative, XY Student, XY Neo, and XY Base modes with vision OCR and image synthesis." />
