@@ -6,7 +6,7 @@ import './index.css';
 // Register Service Worker for Progressive Web App (PWA)
 if ('serviceWorker' in navigator && (import.meta as any).env?.PROD) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
+    navigator.serviceWorker.register(`${(import.meta as any).env.BASE_URL}sw.js`)
       .then((registration) => {
         console.log('[PWA] Service Worker registered successfully with scope:', registration.scope);
       })
@@ -17,7 +17,7 @@ if ('serviceWorker' in navigator && (import.meta as any).env?.PROD) {
 } else if ('serviceWorker' in navigator) {
   // Register in dev mode too for easier local verification if needed
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
+    navigator.serviceWorker.register(`${(import.meta as any).env.BASE_URL}sw.js`)
       .then((registration) => {
         console.log('[PWA] Service Worker (Dev Mode) registered:', registration.scope);
       })

@@ -1,10 +1,10 @@
 const CACHE_NAME = 'xybot-ai-cache-v1';
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/xybot-logo.png',
-  '/xybot-logo.jpg'
+  './',
+  'index.html',
+  'manifest.json',
+  'xybot-logo.png',
+  'xybot-logo.jpg'
 ];
 
 // Install event - Cache core app shell
@@ -71,7 +71,7 @@ self.addEventListener('fetch', (event) => {
           return networkResponse;
         }).catch(() => {
           // If both fail and it's a navigation request, we could fallback or just let it fail
-          return caches.match('/');
+          return caches.match('./');
         });
       })
   );
