@@ -18,13 +18,5 @@
   <body class="bg-[#050505] text-slate-100 antialiased overflow-x-hidden">
     <div id="root"></div>
 
-    <!-- PWA Service Worker Registration -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/XYBOT-AI/sw.js');
-        });
-      }
-    </script>
   </body>
 </html>
