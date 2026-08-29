@@ -35,7 +35,7 @@ export const XYBotLogo: React.FC<LogoProps> = ({
           className="relative z-10 w-full h-full rounded-2xl overflow-hidden flex items-center justify-center bg-black/90 border border-white/10 shadow-[0_0_20px_rgba(0,242,255,0.4)] transition-transform hover:scale-105"
         >
           <img
-            src="/xybot-logo.png"
+            src={`${(import.meta as any).env.BASE_URL || '/'}xybot-logo.png`}
             alt="XYBOT AI"
             referrerPolicy="no-referrer"
             onError={() => setImageError(true)}
