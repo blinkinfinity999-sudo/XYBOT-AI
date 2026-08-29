@@ -16,6 +16,14 @@
   <body class="bg-[#050505] text-slate-100 antialiased overflow-x-hidden">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js');
+        });
+      }
+    </script>
   </body>
 </html>
-
