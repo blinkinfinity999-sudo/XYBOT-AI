@@ -1,0 +1,11 @@
+{
+  "name": "Remix XYBOT AI",
+  "description": "Next-generation futuristic AI chatbot with XY Light, XY Creative, XY Student, XY Neo, and XY Base modes, vision OCR, AI tools, voice chat, and image generation.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
