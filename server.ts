@@ -63,7 +63,7 @@ async function generateContentWithResilience(
   preferredModel: string,
   contents: any,
   config: any,
-  fallbackModels: string[] = ["gemini-flash-latest", "gemini-3.1-flash-lite", "gemini-3.7-flash"]
+  fallbackModels: string[] = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.5-pro"]
 ) {
   const modelsToTry = Array.from(new Set([preferredModel, ...fallbackModels].filter(Boolean)));
   let lastError: any = null;
@@ -107,7 +107,7 @@ async function generateContentStreamWithResilience(
   contents: any,
   config: any,
   onChunk: (chunkText: string) => void,
-  fallbackModels: string[] = ["gemini-flash-latest", "gemini-3.1-flash-lite", "gemini-3.7-flash"]
+  fallbackModels: string[] = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.5-pro"]
 ): Promise<string> {
   const modelsToTry = Array.from(new Set([preferredModel, ...fallbackModels].filter(Boolean)));
   let lastError: any = null;
@@ -226,6 +226,13 @@ app.post("/api/chat", async (req: Request, res: Response) => {
 
     const modeConfig = getModeConfig(mode);
     let finalSystem = systemInstruction || modeConfig.systemInstruction;
+    
+    // Inject dynamic image generation capability directive
+    finalSystem += `\n\nIMAGE GENERATION CAPABILITY: If the user explicitly asks you to generate, create, draw, design, synthesize, or render an image, you MUST respond by embedding a real, working markdown image tag using Pollinations AI. 
+Use this exact format:
+![Brief Description of Image](https://image.pollinations.ai/p/{encodedPrompt}?width=1024&height=1024&nologo=true)
+where {encodedPrompt} is the descriptive prompt translated into English, enhanced with cinematic/artistic terms, and fully URL-encoded (e.g. spaces replaced with %20). Describe the image you are generating first, then include the image tag on a new line.`;
+
     if (userName) {
       finalSystem += `\n\nUser Profile Context: Addressing user "${userName}".`;
     }
@@ -297,7 +304,7 @@ app.post("/api/chat", async (req: Request, res: Response) => {
 
       const fullResponse = await generateContentStreamWithResilience(
         ai,
-        model || "gemini-flash-latest",
+        model || "gemini-2.5-flash",
         contents,
         {
           systemInstruction: finalSystem,
@@ -306,7 +313,7 @@ app.post("/api/chat", async (req: Request, res: Response) => {
         (chunkText: string) => {
           res.write(`data: ${JSON.stringify({ chunk: chunkText })}\n\n`);
         },
-        ["gemini-flash-latest", "gemini-3.1-flash-lite", "gemini-3.7-flash"]
+        ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.5-pro"]
       );
 
       // Generate instant smart quick follow-up suggestions dynamically
@@ -316,13 +323,13 @@ app.post("/api/chat", async (req: Request, res: Response) => {
     } else {
       const response = await generateContentWithResilience(
         ai,
-        model || "gemini-flash-latest",
+        model || "gemini-2.5-flash",
         contents,
         {
           systemInstruction: finalSystem,
           temperature: finalTemperature,
         },
-        ["gemini-flash-latest", "gemini-3.1-flash-lite", "gemini-3.7-flash"]
+        ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.5-pro"]
       );
 
       const text = response.text || "";
@@ -436,7 +443,7 @@ const handleVisionRequest = async (req: Request, res: Response) => {
 
     const response = await generateContentWithResilience(
       ai,
-      "gemini-flash-latest",
+      "gemini-2.5-flash",
       {
         parts: [
           {
@@ -451,7 +458,7 @@ const handleVisionRequest = async (req: Request, res: Response) => {
       {
         systemInstruction: systemPrompt,
       },
-      ["gemini-flash-latest", "gemini-3.1-flash-lite", "gemini-3.7-flash"]
+      ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.5-pro"]
     );
 
     res.json({ text: response.text || "" });
@@ -518,12 +525,12 @@ const handleToolRequest = async (req: Request, res: Response) => {
 
     const response = await generateContentWithResilience(
       ai,
-      "gemini-flash-latest",
+      "gemini-2.5-flash",
       prompt,
       {
         systemInstruction,
       },
-      ["gemini-flash-latest", "gemini-3.1-flash-lite", "gemini-3.7-flash"]
+      ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.5-pro"]
     );
 
     const result = response.text || "";
@@ -579,19 +586,28 @@ const handleImageGenRequest = async (req: Request, res: Response) => {
       }
     }
 
-    // High quality procedural SVG/Canvas futuristic neural art synthesis fallback
-    const fallbackImage = createFuturisticArtSvg(prompt, style);
+    // High quality Pollinations AI image generation fallback (always returns real photographic or digital art)
+    const cleanPrompt = prompt.replace(/[^\w\s-]/g, '').trim();
+    const cleanStyle = style.replace(/[^\w\s-]/g, '').trim();
+    const promptKeywords = `${cleanPrompt}, ${cleanStyle} style digital art, volumetric lighting, photorealistic cinematic masterwork, UHD`;
+    const width = aspectRatio === "16:9" ? 1280 : aspectRatio === "9:16" ? 720 : aspectRatio === "4:3" ? 1024 : 1024;
+    const height = aspectRatio === "16:9" ? 720 : aspectRatio === "9:16" ? 1280 : aspectRatio === "4:3" ? 768 : 1024;
+    const seed = Math.floor(Math.random() * 1000000);
+    const pollinationsUrl = `https://image.pollinations.ai/p/${encodeURIComponent(promptKeywords)}?width=${width}&height=${height}&nologo=true&seed=${seed}`;
+
     res.json({
-      imageUrl: fallbackImage,
+      imageUrl: pollinationsUrl,
       prompt,
       style,
       aspectRatio,
-      isSynthetic: true,
+      isSynthetic: false,
     });
   } catch (error: any) {
     console.error("Image Generation Error:", error);
-    const fallback = createFuturisticArtSvg(req.body.prompt || "Cybernetic Vision", req.body.style || "Futuristic");
-    res.json({ imageUrl: fallback, prompt: req.body.prompt, style: req.body.style });
+    const cleanPrompt = (req.body.prompt || "Cybernetic Vision").replace(/[^\w\s-]/g, '').trim();
+    const cleanStyle = (req.body.style || "Futuristic").replace(/[^\w\s-]/g, '').trim();
+    const pollinationsUrl = `https://image.pollinations.ai/p/${encodeURIComponent(cleanPrompt + ", " + cleanStyle + " style digital art")}?width=1024&height=1024&nologo=true`;
+    res.json({ imageUrl: pollinationsUrl, prompt: req.body.prompt, style: req.body.style });
   }
 };
 

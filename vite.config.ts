@@ -5,7 +5,7 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
-    base: '/XYBOT-AI/',
+    base: './',
     publicDir: 'public',
     plugins: [react(), tailwindcss()],
     resolve: {

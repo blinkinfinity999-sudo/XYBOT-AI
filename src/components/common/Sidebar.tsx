@@ -25,9 +25,7 @@ import {
   Layers,
   PanelLeftClose,
   ChevronRight,
-  Shield,
-  Download,
-  Laptop
+  Shield
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ProfileSwitcher } from '../profile/ProfileSwitcher';
@@ -64,56 +62,6 @@ export const Sidebar: React.FC<Props> = ({ onOpenHelp, onOpenAbout }) => {
   const [isFeaturesDropdownOpen, setIsFeaturesDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const isPremium = user.plan !== 'free';
-
-  // PWA Install Prompt States
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [isStandalone, setIsStandalone] = useState<boolean>(false);
-  const [showInstallSuccess, setShowInstallSuccess] = useState<boolean>(false);
-
-  useEffect(() => {
-    // Detect if running as standalone/installed app
-    const checkStandalone = () => {
-      const isStandaloneMode = window.matchMedia('(display-mode: standalone)').matches 
-        || (navigator as any).standalone 
-        || document.referrer.includes('android-app://');
-      setIsStandalone(isStandaloneMode);
-    };
-
-    checkStandalone();
-
-    // Listen for beforeinstallprompt event
-    const handleBeforePrompt = (e: any) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforePrompt);
-
-    // Listen for successful installation
-    const handleAppInstalled = () => {
-      console.log('[PWA] App installed successfully');
-      setDeferredPrompt(null);
-      setIsStandalone(true);
-      setShowInstallSuccess(true);
-      setTimeout(() => setShowInstallSuccess(false), 5000);
-    };
-
-    window.addEventListener('appinstalled', handleAppInstalled);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforePrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
-    };
-  }, []);
-
-  const handleInstallClick = async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      console.log(`[PWA] Install choice outcome: ${outcome}`);
-      setDeferredPrompt(null);
-    }
-  };
 
   // Close features dropdown on click outside
   useEffect(() => {
@@ -568,51 +516,6 @@ export const Sidebar: React.FC<Props> = ({ onOpenHelp, onOpenAbout }) => {
               />
             </div>
           </div>
-
-          {/* PWA Download / Install App widget */}
-          {!isStandalone && (
-            <div className="mx-3 my-1 p-3 rounded-2xl bg-gradient-to-br from-cyan-950/20 to-blue-950/20 border border-cyan-500/15 shadow-md flex flex-col gap-2.5">
-              <div className="flex items-start gap-2">
-                <div className="p-1.5 rounded-lg bg-cyan-500/10 text-cyan-400">
-                  <Download className="w-4 h-4" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <span className="text-[11px] font-bold text-white block">Download XYbot AI</span>
-                  <span className="text-[9px] text-slate-400 block leading-normal mt-0.5">
-                    Install for offline access, desktop dock, and custom speeds.
-                  </span>
-                </div>
-              </div>
-
-              {deferredPrompt ? (
-                <button
-                  onClick={handleInstallClick}
-                  className="w-full py-1.5 px-3 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 hover:brightness-110 text-slate-950 font-bold text-[10px] tracking-wide transition-all shadow-sm flex items-center justify-center gap-1.5 active:scale-95"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Install Web App</span>
-                </button>
-              ) : (
-                <div className="space-y-1 border-t border-white/5 pt-1.5">
-                  <span className="text-[8px] font-bold text-cyan-400 uppercase tracking-widest block">How to setup:</span>
-                  <p className="text-[9px] text-slate-400 flex items-start gap-1 leading-normal">
-                    <span className="w-1 h-1 rounded-full bg-cyan-400/60 mt-1 flex-shrink-0" />
-                    <span><strong>Chrome/Edge:</strong> Click install icon in URL bar</span>
-                  </p>
-                  <p className="text-[9px] text-slate-400 flex items-start gap-1 leading-normal">
-                    <span className="w-1 h-1 rounded-full bg-cyan-400/60 mt-1 flex-shrink-0" />
-                    <span><strong>Safari (iOS):</strong> Share &rarr; Add to Home Screen</span>
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {showInstallSuccess && (
-            <div className="mx-3 my-1 p-2.5 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[10px] font-medium text-center animate-pulse">
-              XYbot AI successfully installed!
-            </div>
-          )}
 
           {/* User Identity / Multi-Profile Switcher */}
           <div className="pt-1">

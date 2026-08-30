@@ -17,6 +17,7 @@ import { ShortcutsModal } from './components/common/ShortcutsModal';
 import { HelpAboutModal } from './components/common/HelpAboutModal';
 import { ToastContainer } from './components/common/ToastContainer';
 import { NetworkBanner } from './components/common/NetworkBanner';
+import { PwaInstallWidget } from './components/common/PwaInstallWidget';
 
 const MainLayout: React.FC = () => {
   const { 
@@ -114,6 +115,7 @@ const MainLayout: React.FC = () => {
         />
       )}
       <ToastContainer />
+      <PwaInstallWidget />
     </div>
   );
 };

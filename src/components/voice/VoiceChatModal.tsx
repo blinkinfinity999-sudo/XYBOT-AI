@@ -27,6 +27,7 @@ export const VoiceChatModal: React.FC = () => {
 
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
+  const transcriptRef = useRef('');
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -71,6 +72,7 @@ export const VoiceChatModal: React.FC = () => {
           currentText += event.results[i][0].transcript;
         }
         setTranscript(currentText);
+        transcriptRef.current = currentText;
       };
 
       recognition.onerror = (event: any) => {
@@ -80,6 +82,11 @@ export const VoiceChatModal: React.FC = () => {
 
       recognition.onend = () => {
         setIsListening(false);
+        // Automatically transmit query when user finishes speaking
+        const finalPhrase = transcriptRef.current.trim();
+        if (finalPhrase) {
+          handleSendVoiceQuery(finalPhrase);
+        }
       };
 
       recognitionRef.current = recognition;
@@ -109,6 +116,7 @@ export const VoiceChatModal: React.FC = () => {
 
     setConversationLogs((prev) => [...prev, { role: 'user', text: queryText }]);
     setTranscript('');
+    transcriptRef.current = '';
 
     try {
       const response = await fetch('/api/chat', {
@@ -117,6 +125,8 @@ export const VoiceChatModal: React.FC = () => {
         body: JSON.stringify({
           messages: [{ role: 'user', content: queryText }],
           stream: false,
+          model: 'gemini-2.5-flash',
+          systemInstruction: 'You are XYBOT Voice Core. Respond in a highly conversational, warm, and extremely concise manner. Limit your response strictly to 1 or 2 simple sentences (max 30 words) with no markdown, formatting, list items, or special characters, as this will be read aloud immediately.',
         }),
       });
 
